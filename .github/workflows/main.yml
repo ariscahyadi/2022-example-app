@@ -46,7 +46,7 @@ jobs:
       
       - name: sca analysis
         run: 
-          safety -r app/web/requirements.txt
+          safety check -r app/web/requirements.txt
 
   
   test:
