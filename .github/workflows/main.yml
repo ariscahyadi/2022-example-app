@@ -9,17 +9,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      run: echo build
+      - run: echo build
   
   test:
     runs-on: ubuntu-latest
 
     steps:
-      run: echo test
+      - run: echo test
 
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-      run: echo deploy
+      - run: echo deploy
   
