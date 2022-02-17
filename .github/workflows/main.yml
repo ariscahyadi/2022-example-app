@@ -43,29 +43,15 @@ jobs:
       - name: Install safety
         run:
           pip install safety
-
-      - run: mkdir -p logs/
-
       
       - name: sca analysis
         run: 
-          safety check -r app/web/requirements.txt > logs/safety-logs.txt
+          safety check -r app/web/requirements.txt > safety-logs.txt
 
       - uses: actions/upload-artifact@v2
         with:
           name: logs
-          path: logs/safety-logs.txt
-          
-      - name: Download log
-        uses: actions/download-artifact@v2
-        with:
-          name: logs
-      - name: Print the final result
-        shell: bash
-        run: |
-          value=`cat logs/safety-logs.txt`
-          echo The result is $value
-
+          path: safety-logs.txt
   
   test:
     needs: [build, sca]
