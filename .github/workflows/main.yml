@@ -28,6 +28,15 @@ jobs:
       
       - name: Build docker-compose
         run: docker-compose -f docker-compose.yml up --build -d
+
+  sca:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out master
+        uses: actions/checkout@master
+
+      - name: Security vulnerabilities scan
+        uses: aufdenpunkt/python-safety-check@master
   
   test:
     needs: build
