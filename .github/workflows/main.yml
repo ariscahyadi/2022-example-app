@@ -35,8 +35,19 @@ jobs:
       - name: Check out master
         uses: actions/checkout@master
 
-      - name: Security vulnerabilities scan
-        uses: aufdenpunkt/python-safety-check@master
+      - name: Install python
+        uses: actions/setup-python@v1
+        with:
+          python-version: "3.6"
+      
+      - name: Install safety
+        run:
+          pip install safety
+      
+      - name: sca analysis
+        run: 
+          safety -r app/web/requirements.txt
+
   
   test:
     needs: build
