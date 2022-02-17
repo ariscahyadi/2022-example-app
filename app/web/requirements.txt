@@ -5,4 +5,3 @@ Flask-Limiter
 flask-login
 pymysql
 requests
-insecure-package==0.1.0
