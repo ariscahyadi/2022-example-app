@@ -10,7 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Creating exclude path
+        run: |
+          mkdir -p configuration
+          echo 'app/' > configuration/exclude_path.txt
+
       - uses: max/secret-scan@master
+        with:
+          exclude_path: 'configuration/exclude_path.txt'
 
   build:
     runs-on: ubuntu-latest
