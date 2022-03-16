@@ -97,3 +97,11 @@ jobs:
           cd docker-bench-security
           sudo sh docker-bench-security.sh
 
+  dast:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: ZAP Scan
+        uses: zaproxy/action-full-scan@v0.3.0
+        with:
+           target: 'http://localhost:5000'
