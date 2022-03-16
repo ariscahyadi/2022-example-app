@@ -84,9 +84,17 @@ jobs:
       - name: Run remote code execution tests
         run: |
           python tests/test_04.py
-          
-  secure-runtime:
+  
+  deploy:
     needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build docker-compose
+        run: docker-compose -f docker-compose.yml up -d
+  
+  secure-runtime:
+    needs: [deploy]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -98,7 +106,7 @@ jobs:
           sudo sh docker-bench-security.sh
 
   dast:
-    needs: [test]
+    needs: [deploy]
     runs-on: ubuntu-latest
     steps:
       - name: ZAP Scan
