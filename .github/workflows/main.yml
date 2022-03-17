@@ -21,6 +21,7 @@ jobs:
           exclude_path: 'configuration/exclude_path.txt'
 
   build:
+    needs: [secret-scan]
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +31,7 @@ jobs:
         run: docker-compose -f docker-compose.yml up --build -d
 
   sca:
+    needs: [deploy]
     runs-on: ubuntu-latest
     steps:
       - name: Check out master
