@@ -52,16 +52,32 @@ jobs:
         with:
           name: logs
           path: safety-logs.txt
-  
-  test:
+          
+  sast:
     needs: [build, sca]
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2 
+        
+      - run: |
+          mkdir -p logs/      
       
-      - name: Build Image for testing
-        run: docker-compose -f docker-compose.yml up --build -d 
+      - uses: jpetrucciani/bandit-check@master
+        with:
+          path: '.'
+          bandit_flags: '-lll -o logs/output.json -f json'
+    
+      - uses: actions/upload-artifact@v2
+        with:
+          name: logs
+          path: logs/output.json
+  test:
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
         
       - name: Set up Python 3.6
         uses: actions/setup-python@v1
@@ -84,9 +100,28 @@ jobs:
       - name: Run remote code execution tests
         run: |
           python tests/test_04.py
+          
+  container-scan:
+    needs: [test, sast]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run Dockle
+        uses: erzz/dockle-action@v1.1.1
+        with:
+          image: sristisravan/tic4302-demo
+          report-format: json
+          report-name: dockle-report
+          
+      - name: Upload Report
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: Dockle Report
+          path: dockle-report.json
   
   deploy:
-    needs: [test]
+    needs: [container-scan]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -104,12 +139,3 @@ jobs:
           git clone https://github.com/docker/docker-bench-security.git
           cd docker-bench-security
           sudo sh docker-bench-security.sh
-
-  dast:
-    needs: [deploy]
-    runs-on: ubuntu-latest
-    steps:
-      - name: ZAP Scan
-        uses: zaproxy/action-full-scan@v0.3.0
-        with:
-           target: 'http://localhost:5000'
