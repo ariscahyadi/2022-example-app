@@ -31,7 +31,7 @@ jobs:
         run: docker-compose -f docker-compose.yml up --build -d
 
   sca:
-    needs: [deploy]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Check out master
