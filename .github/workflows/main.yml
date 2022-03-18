@@ -148,3 +148,20 @@ jobs:
           git clone https://github.com/docker/docker-bench-security.git
           cd docker-bench-security
           sudo sh docker-bench-security.sh
+
+  dast: 
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Build Image for testing
+        run: docker-compose -f docker-compose.yml up --build -d 
+
+      - name: ZAP Scan
+        uses: zaproxy/action-baseline@v0.6.1
+        with:
+          docker_name: 'owasp/zap2docker-stable'
+          target: 'http://localhost:5000'
+          cmd_options: '-a'
