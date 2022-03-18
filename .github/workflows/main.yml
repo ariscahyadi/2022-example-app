@@ -56,7 +56,7 @@ jobs:
           path: safety-logs.txt
           
   sast:
-    needs: [build, sca]
+    needs: [build]
     runs-on: ubuntu-latest
 
     steps:
@@ -80,6 +80,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      
+      - name: Build Image for testing
+        run: docker-compose -f docker-compose.yml up --build -d 
         
       - name: Set up Python 3.6
         uses: actions/setup-python@v1
@@ -104,23 +107,26 @@ jobs:
           python tests/test_04.py
           
   container-scan:
-    needs: [test, sast]
+    needs: [sca, test, sast]
     runs-on: ubuntu-latest
 
     steps:
-      - name: Run Dockle
-        uses: erzz/dockle-action@v1.1.1
-        with:
-          image: sristisravan/tic4302-demo
-          report-format: json
-          report-name: dockle-report
+      - name: Build docker image
+        run: docker build ./app/web/ -t tic4302
+
+      - name: Scan image by dockle
+        run: |
+          echo "Scan image by dockle"
+          mkdir logs
+          curl -sL https://github.com/goodwithtech/dockle/releases/download/v0.4.5/dockle_0.4.5_Linux-64bit.tar.gz -o /tmp/dockle.tar.gz
+          tar zxf /tmp/dockle.tar.gz -C /tmp
+          sudo mv /tmp/dockle /usr/local/bin/
+          dockle -f json -o logs/results.json tic4302
           
-      - name: Upload Report
-        uses: actions/upload-artifact@v2
-        if: always()
+      - uses: actions/upload-artifact@v2
         with:
-          name: Dockle Report
-          path: dockle-report.json
+          name: logs
+          path: logs/results.json
   
   deploy:
     needs: [container-scan]
